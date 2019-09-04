@@ -5,9 +5,15 @@
  */
 package com.company.weather;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
+import javax.swing.*;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 import org.xml.sax.SAXException;
@@ -19,7 +25,6 @@ import org.xml.sax.SAXException;
 public class WeatherFrame extends javax.swing.JFrame {
 
     Forecast forecast;
-    String iconsPath = "C:/Users/George/Documents/Uni/Year 2/Semester 2/ICP 2152 - Java Technologies/Weather/src/main/resources/weather icons";
     String[] iconStrings = {"sunny day",
         "partly cloudy (night)",
         "sunny intervals",
@@ -57,15 +62,35 @@ public class WeatherFrame extends javax.swing.JFrame {
     }
     
     /**
-     * ICONS DO NOT WORK, ALL WEATHER PHRASES ARE 'Not available' GRR
+     * ICONS DO NOT WORK, CANNOT ACCESS AND READ THE IMAGES FROM RESOURCES
      */
     private void getIcon() {
+        String weatherStatus = "Not available";
+        jPanel1.removeAll();
         try {
-            String weatherStatus = forecast.weather.substring(forecast.weather.indexOf(": ") + 2, forecast.weather.indexOf(","));
+            weatherStatus = forecast.weather.substring(forecast.weather.indexOf(": ") + 2, forecast.weather.indexOf(","));
             System.out.println("Weather phrase to find icon with: " + weatherStatus);
         } catch (ArrayIndexOutOfBoundsException e) {
             System.out.println("LOG: Cannot find phrase to match an icon to.");
         };
+
+        if (weatherStatus.equalsIgnoreCase("not available")) {
+            weatherStatus = "Icon not available";
+            System.out.println("LOG: " + weatherStatus);
+        } else {
+            String pathname = "weather_icons/" + weatherStatus.replaceAll(" ", "_") + ".png";
+            System.out.println("Pathname: " + pathname);
+            BufferedImage image = null;
+            try {
+                image = ImageIO.read(getClass().getResource(pathname));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            ImageIcon icon = new ImageIcon(image);
+            imageLabel = new JLabel();
+            imageLabel.setIcon(icon);
+            jPanel1.add(imageLabel);
+        }
     }
 
     /**
@@ -93,7 +118,11 @@ public class WeatherFrame extends javax.swing.JFrame {
 
         urlTextInput.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                urlTextInputActionPerformed(evt);
+                try {
+                    urlTextInputActionPerformed(evt);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -102,7 +131,11 @@ public class WeatherFrame extends javax.swing.JFrame {
         forecastButton.setText("Forecast");
         forecastButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                forecastButtonActionPerformed(evt);
+                try {
+                    forecastButtonActionPerformed(evt);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -214,11 +247,11 @@ public class WeatherFrame extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void urlTextInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_urlTextInputActionPerformed
+    private void urlTextInputActionPerformed(java.awt.event.ActionEvent evt) throws IOException {//GEN-FIRST:event_urlTextInputActionPerformed
         forecastButtonActionPerformed(evt);
     }//GEN-LAST:event_urlTextInputActionPerformed
 
-    private void forecastButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_forecastButtonActionPerformed
+    private void forecastButtonActionPerformed(java.awt.event.ActionEvent evt) throws IOException {//GEN-FIRST:event_forecastButtonActionPerformed
 
         String query = urlTextInput.getText();
 
@@ -307,5 +340,6 @@ public class WeatherFrame extends javax.swing.JFrame {
     private java.awt.Label locationLabel;
     private javax.swing.JLabel searchInputLabel;
     private javax.swing.JTextField urlTextInput;
+    private javax.swing.JLabel imageLabel;
     // End of variables declaration//GEN-END:variables
 }
